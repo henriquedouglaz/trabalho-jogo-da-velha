@@ -1,0 +1,405 @@
+
+algoritmo "JogoDaVelhaSupremo"
+
+var
+   // Vetores
+   casas: vetor[1..81] de caractere
+   placar: vetor[1..9] de caractere
+   combinacoes: vetor[1..24] de inteiro
+
+   // Jogadores
+   jogador: caractere
+   vencedor: caractere
+   entrada: caractere
+
+   // Variaveis de controle
+   tab: inteiro
+   pos: inteiro
+   indice: inteiro
+   base: inteiro
+   i: inteiro
+   j: inteiro
+   k: inteiro
+   aux: inteiro
+   quantidade: inteiro
+   vazias: inteiro
+
+   // Variaveis para exibicao
+   tg: inteiro
+   tp: inteiro
+   cg: inteiro
+   cp: inteiro
+   numTab: inteiro
+   numCasa: inteiro
+
+   // Variaveis de verificacao
+   valido: logico
+   ganhou: logico
+   terminou: logico
+   chanceX: logico
+   chanceO: logico
+   bloqueioX: inteiro
+   bloqueioO: inteiro
+
+// ======================================
+// PROCEDIMENTO PARA EXIBIR OS TABULEIROS
+// ======================================
+
+procedimento mostrarTabuleiro
+inicio
+
+   escreval("")
+   escreval("========= TABULEIRO =========")
+
+   para tg de 0 ate 2 faca
+      para tp de 0 ate 2 faca
+
+         para cg de 0 ate 2 faca
+
+            numTab <- tg * 3 + cg + 1
+
+            para cp de 1 ate 3 faca
+
+               numCasa <- tp * 3 + cp
+
+               indice <- (numTab - 1) * 9 + numCasa
+
+               escreva(casas[indice], " ")
+
+            fimpara
+
+            escreva(" | ")
+
+         fimpara
+
+         escreval("")
+
+      fimpara
+
+      escreval("-----------------------------")
+
+   fimpara
+
+   escreval("PLACAR GERAL:")
+
+   para i de 1 ate 9 faca
+
+      escreva(placar[i], " ")
+
+      se i mod 3 = 0 entao
+         escreval("")
+      fimse
+
+   fimpara
+
+   escreval("")
+
+fimprocedimento
+
+// ======================================
+// PROGRAMA PRINCIPAL
+// ======================================
+
+inicio
+
+   // Inicializar as casas
+
+   para i de 1 ate 81 faca
+      casas[i] <- "."
+   fimpara
+
+   // Inicializar o placar
+
+   para i de 1 ate 9 faca
+      placar[i] <- "."
+   fimpara
+
+   // Combinações horizontais
+
+   para i de 1 ate 9 faca
+      combinacoes[i] <- i
+   fimpara
+
+   // Combinações verticais
+
+   combinacoes[10] <- 1
+   combinacoes[11] <- 4
+   combinacoes[12] <- 7
+
+   combinacoes[13] <- 2
+   combinacoes[14] <- 5
+   combinacoes[15] <- 8
+
+   combinacoes[16] <- 3
+   combinacoes[17] <- 6
+   combinacoes[18] <- 9
+
+   // Combinações diagonais
+
+   combinacoes[19] <- 1
+   combinacoes[20] <- 5
+   combinacoes[21] <- 9
+
+   combinacoes[22] <- 3
+   combinacoes[23] <- 5
+   combinacoes[24] <- 7
+
+   // Configuracoes iniciais
+
+   jogador <- "X"
+   vencedor <- "."
+   terminou <- falso
+
+   escreval("================================")
+   escreval("       JOGO DA VELHA SUPREMO")
+   escreval("================================")
+   escreval("Numeracao das posicoes:")
+   escreval("1 2 3")
+   escreval("4 5 6")
+   escreval("7 8 9")
+   escreval("")
+   escreval("Vence quem conquistar tres")
+   escreval("tabuleiros em linha!")
+
+   // ======================================
+   // REPETICAO DAS JOGADAS
+   // ======================================
+
+   enquanto terminou = falso faca
+
+      mostrarTabuleiro
+
+      escreval("Vez do jogador: ", jogador)
+
+      // Escolher o tabuleiro
+
+      repita
+
+         valido <- verdadeiro
+
+         escreva("Escolha um tabuleiro (1 a 9): ")
+         leia(entrada)
+
+         se (compr(entrada) <> 1) ou (entrada < "1") ou (entrada > "9") entao
+
+            escreval("Numero invalido!")
+            valido <- falso
+
+         senao
+
+            tab <- caracpnum(entrada)
+
+            se placar[tab] <> "." entao
+
+               escreval("Esse tabuleiro ja foi encerrado!")
+               valido <- falso
+
+            fimse
+
+         fimse
+
+      ate valido = verdadeiro
+
+      // Escolher a posicao
+
+      repita
+
+         valido <- verdadeiro
+
+         escreva("Escolha uma posicao (1 a 9): ")
+         leia(entrada)
+
+         se (compr(entrada) <> 1) ou (entrada < "1") ou (entrada > "9") entao
+
+            escreval("Posicao invalida!")
+            valido <- falso
+
+         senao
+
+            pos <- caracpnum(entrada)
+
+            indice <- (tab - 1) * 9 + pos
+
+            se casas[indice] <> "." entao
+
+               escreval("Essa posicao ja esta ocupada!")
+               valido <- falso
+
+            fimse
+
+         fimse
+
+      ate valido = verdadeiro
+
+      // Registrar a jogada
+
+      base <- (tab - 1) * 9
+
+      casas[base + pos] <- jogador
+
+      // ======================================
+      // VERIFICAR VITORIA NO TABULEIRO PEQUENO
+      // ======================================
+
+      ganhou <- falso
+
+      para k de 0 ate 7 faca
+
+         quantidade <- 0
+
+         para j de 1 ate 3 faca
+
+            aux <- combinacoes[k * 3 + j]
+
+            se casas[base + aux] = jogador entao
+               quantidade <- quantidade + 1
+            fimse
+
+         fimpara
+
+         se quantidade = 3 entao
+            ganhou <- verdadeiro
+         fimse
+
+      fimpara
+
+      se ganhou = verdadeiro entao
+
+         placar[tab] <- jogador
+
+         escreval("Jogador ", jogador, " conquistou o tabuleiro ", tab, "!")
+
+      senao
+
+         // Verificar empate no tabuleiro pequeno
+
+         vazias <- 0
+
+         para i de 1 ate 9 faca
+
+            se casas[base + i] = "." entao
+               vazias <- vazias + 1
+            fimse
+
+         fimpara
+
+         se vazias = 0 entao
+
+            placar[tab] <- "E"
+
+            escreval("O tabuleiro terminou empatado!")
+
+         fimse
+
+      fimse
+
+      // ======================================
+      // VERIFICAR VITORIA GERAL
+      // ======================================
+
+      para k de 0 ate 7 faca
+
+         quantidade <- 0
+
+         para j de 1 ate 3 faca
+
+            aux <- combinacoes[k * 3 + j]
+
+            se placar[aux] = jogador entao
+               quantidade <- quantidade + 1
+            fimse
+
+         fimpara
+
+         se quantidade = 3 entao
+
+            vencedor <- jogador
+            terminou <- verdadeiro
+
+         fimse
+
+      fimpara
+
+      // ======================================
+      // VERIFICAR POSSIBILIDADE DE VITORIA
+      // ======================================
+
+      se terminou = falso entao
+
+         chanceX <- falso
+         chanceO <- falso
+
+         para k de 0 ate 7 faca
+
+            bloqueioX <- 0
+            bloqueioO <- 0
+
+            para j de 1 ate 3 faca
+
+               aux <- combinacoes[k * 3 + j]
+
+               se (placar[aux] = "O") ou (placar[aux] = "E") entao
+                  bloqueioX <- bloqueioX + 1
+               fimse
+
+               se (placar[aux] = "X") ou (placar[aux] = "E") entao
+                  bloqueioO <- bloqueioO + 1
+               fimse
+
+            fimpara
+
+            se bloqueioX = 0 entao
+               chanceX <- verdadeiro
+            fimse
+
+            se bloqueioO = 0 entao
+               chanceO <- verdadeiro
+            fimse
+
+         fimpara
+
+         se (chanceX = falso) e (chanceO = falso) entao
+            terminou <- verdadeiro
+         fimse
+
+      fimse
+
+      // ======================================
+      // ALTERNAR JOGADOR
+      // ======================================
+
+      se terminou = falso entao
+
+         se jogador = "X" entao
+            jogador <- "O"
+         senao
+            jogador <- "X"
+         fimse
+
+      fimse
+
+   fimenquanto
+
+   // ======================================
+   // RESULTADO FINAL
+   // ======================================
+
+   mostrarTabuleiro
+
+   escreval("================================")
+
+   se vencedor <> "." entao
+
+      escreval("FIM DE JOGO!")
+      escreval("VITORIA DO JOGADOR ", vencedor, "!")
+
+   senao
+
+      escreval("FIM DE JOGO!")
+      escreval("EMPATE! Ninguem pode mais vencer.")
+
+   fimse
+
+   escreval("================================")
+
+fimalgoritmo
